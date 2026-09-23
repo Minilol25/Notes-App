@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notizen</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#E7ECE4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141A28" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Notizen">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E7ECE4; --surface:#F5F7F2; --ink:#1F2A44; --muted:#5E6878; --line:#CBD3C6;
+  --accent:#E3A13A; --accent-ink:#1F2A44; --danger:#B3413A;
+  --c-none:transparent; --c-blau:#4C7BD9; --c-gruen:#3F9A6B; --c-gelb:#E3A13A; --c-rot:#D0574E; --c-lila:#8A62C9;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141A28; --surface:#1C2436; --ink:#E6E9EF; --muted:#98A2B4; --line:#2C3650;
+    --accent:#F0B24E; --accent-ink:#141A28; --danger:#E0716A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141A28; --surface:#1C2436; --ink:#E6E9EF; --muted:#98A2B4; --line:#2C3650;
+  --accent:#F0B24E; --accent-ink:#141A28; --danger:#E0716A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{min-height:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px 120px}
+
+/* ---------- list view ---------- */
+header.top{padding:28px 0 14px}
+h1{font-family:var(--display);font-weight:700;font-size:44px;line-height:1;letter-spacing:-.02em;margin:0 0 18px;font-variation-settings:"opsz" 96}
+.count{font-family:var(--body);font-size:15px;color:var(--muted);font-weight:400;margin-left:8px;letter-spacing:0}
+.search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 14px;height:48px}
+.search svg{flex:none;color:var(--muted)}
+.search input{flex:1;border:0;background:none;color:var(--ink);font:inherit;min-width:0;height:100%}
+.search input:focus{outline:none}
+.search:focus-within{border-color:var(--accent)}
+.group-title{font-size:15px;color:var(--muted);margin:26px 0 8px;font-weight:700}
+ul.notes{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (min-width:560px){ul.notes{grid-template-columns:repeat(3,minmax(0,1fr))}}
+ul.notes li{display:flex;min-width:0}
+.card{--rule:22px;--card-color:var(--line);
+  position:relative;display:flex;flex-direction:column;width:100%;text-align:left;
+  height:156px;padding:10px 12px 10px;border-radius:4px;
+  background-color:var(--surface);
+  background-image:repeating-linear-gradient(to bottom,transparent 0 calc(var(--rule) - 1px),color-mix(in srgb,var(--c-blau) 22%,transparent) calc(var(--rule) - 1px) var(--rule));
+  background-position:0 44px;background-repeat:no-repeat;background-size:100% calc(100% - 44px);
+  border:1px solid var(--line);border-top:4px solid var(--card-color);
+  box-shadow:0 1px 0 var(--line),0 3px 0 -1px var(--surface),0 3px 0 0 var(--line);
+  transition:transform .12s}
+.card:active{transform:scale(.97)}
+.card h2{font-family:var(--display);font-weight:700;font-size:16px;line-height:1.2;margin:0;letter-spacing:-.005em;
+  height:34px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;
+  border-bottom:1.5px solid color-mix(in srgb,var(--c-rot) 55%,transparent);padding-bottom:0;margin-bottom:0}
+.card h2.untitled{color:var(--muted);font-weight:500}
+.card p{margin:0;padding-top:1px;font-size:13.5px;line-height:var(--rule);color:var(--ink);opacity:.8;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;white-space:pre-line}
+.card time{margin-top:auto;font-size:12px;color:var(--muted);align-self:flex-end;padding-top:4px}
+.card .pin{position:absolute;top:-10px;right:10px;color:var(--accent)}
+mark{background:color-mix(in srgb,var(--accent) 40%,transparent);color:inherit;border-radius:3px}
+
+.empty{text-align:center;padding:64px 20px;color:var(--muted)}
+.empty strong{display:block;font-family:var(--display);font-size:24px;color:var(--ink);font-weight:500;margin-bottom:6px}
+
+.fab{position:fixed;right:max(20px,calc(50% - 300px));bottom:calc(24px + env(safe-area-inset-bottom,0px));height:60px;padding:0 24px 0 20px;border-radius:30px;background:var(--accent);color:var(--accent-ink);font-weight:700;display:flex;align-items:center;gap:8px;box-shadow:0 6px 20px color-mix(in srgb,var(--accent) 45%,transparent);font-size:17px}
+.fab:active{transform:scale(.96)}
+
+/* ---------- editor view ---------- */
+.editor{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);z-index:10;visibility:hidden}
+.editor.open{transform:none;visibility:visible}
+@media (prefers-reduced-motion: reduce){.editor{transition:none}}
+.bar{display:flex;align-items:center;gap:4px;padding:8px 10px;max-width:640px;width:100%;margin:0 auto}
+.icon-btn{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--ink)}
+.icon-btn:active{background:var(--surface)}
+.icon-btn.on{color:var(--accent)}
+.back{display:flex;align-items:center;gap:2px;padding:0 10px 0 4px;height:44px;font-weight:700}
+.status{flex:1;text-align:center;font-size:13px;color:var(--muted)}
+.edit-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.edit-inner{max-width:640px;margin:0 auto;padding:4px 22px 60px;border-left:4px solid transparent}
+#title{width:100%;border:0;background:none;color:var(--ink);font-family:var(--display);font-weight:700;font-size:30px;line-height:1.15;letter-spacing:-.015em;padding:8px 0;resize:none;overflow:hidden}
+#title::placeholder,#body::placeholder{color:var(--muted);opacity:.7}
+#title:focus,#body:focus{outline:none}
+#body{width:100%;border:0;background:none;color:var(--ink);font:inherit;font-size:18px;line-height:1.6;padding:6px 0;resize:none;min-height:50vh;overflow:hidden}
+.meta{font-size:13px;color:var(--muted);margin-top:2px}
+
+.colors{display:none;gap:10px;padding:4px 22px 10px;max-width:640px;margin:0 auto;width:100%}
+.colors.show{display:flex}
+.swatch{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);position:relative}
+.swatch[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--bg)}
+.swatch.none{background:repeating-linear-gradient(45deg,transparent 0 5px,var(--line) 5px 7px)}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);border-radius:14px;padding:6px 6px 6px 18px;display:flex;align-items:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20;max-width:calc(100% - 32px);font-size:15px}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{color:var(--accent);font-weight:700;padding:10px 12px;border-radius:10px}
+.notice{font-size:13px;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="listView">
+  <header class="top">
+    <h1>Notizen<span class="count" id="count"></span></h1>
+    <label class="search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Notizen durchsuchen" autocomplete="off" aria-label="Notizen durchsuchen">
+    </label>
+    <div class="notice" id="notice" hidden></div>
+  </header>
+  <main id="list" aria-live="polite"></main>
+</div>
+
+<button class="fab" id="newBtn" aria-label="Neue Notiz">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  Neue Notiz
+</button>
+
+<section class="editor" id="editor" aria-label="Notiz bearbeiten">
+  <div class="bar">
+    <button class="back" id="backBtn" aria-label="Zurück zur Übersicht">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Notizen
+    </button>
+    <span class="status" id="status"></span>
+    <button class="icon-btn" id="pinBtn" aria-label="Anheften" aria-pressed="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 3h6l-1 6 4 4H6l4-4-1-6zM12 13v8"/></svg>
+    </button>
+    <button class="icon-btn" id="colorBtn" aria-label="Farbe wählen" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 1 0 16" fill="currentColor"/></svg>
+    </button>
+    <button class="icon-btn" id="delBtn" aria-label="Notiz löschen">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+    </button>
+  </div>
+  <div class="colors" id="colors" role="group" aria-label="Farbe"></div>
+  <div class="edit-body">
+    <div class="edit-inner" id="editInner">
+      <textarea id="title" rows="1" placeholder="Titel" aria-label="Titel"></textarea>
+      <div class="meta" id="meta"></div>
+      <textarea id="body" placeholder="Schreib etwas …" aria-label="Notiztext"></textarea>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button id="undoBtn">Rückgängig</button></div>
+
+<script>
+(() => {
+  const COLORS = [["none","Keine"],["blau","Blau"],["gruen","Grün"],["gelb","Gelb"],["rot","Rot"],["lila","Lila"]];
+  const $ = id => document.getElementById(id);
+  const notes = new Map();       // id -> note
+  let currentId = null, query = "", ready = false;
+
+  /* ---------------- storage layer ---------------- */
+  const LS_KEY = "notizen-v1";
+  const local = {
+    load(){ try{ const raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : []; }catch(e){ return []; } },
+    saveAll(){ try{ localStorage.setItem(LS_KEY, JSON.stringify([...notes.values()])); }catch(e){} }
+  };
+  let backend = null; // {col}
+  const writeChains = new Map(); // id -> promise (one write at a time per doc)
+  const timers = new Map();
+
+  function persist(id, immediate){
+    clearTimeout(timers.get(id));
+    const run = () => {
+      timers.delete(id);
+      if(!backend){ local.saveAll(); setStatus("Gespeichert"); return; }
+      const n = notes.get(id);
+      const prev = writeChains.get(id) || Promise.resolve();
+      const next = prev.then(() => n ? backend.col.doc(id).set(clean(n)) : backend.col.doc(id).delete())
+        .then(() => setStatus("Gespeichert"))
+        .catch(err => {
+          if(err && err.code === "quota_exceeded") setStatus("Speicher voll – alte Notizen löschen");
+          else setStatus("Nicht gespeichert – Verbindung prüfen");
+        });
+      writeChains.set(id, next);
+    };
+    if(immediate) run(); else { setStatus("Speichert …"); timers.set(id, setTimeout(run, 700)); }
+  }
+  const clean = n => ({title:n.title, body:n.body, color:n.color, pinned:!!n.pinned, createdAt:n.createdAt, updatedAt:n.updatedAt});
+
+  function init(){ useLocal(); }
+  function useLocal(){
+    backend = null;
+    local.load().forEach(n => notes.set(n.id, n));
+    ready = true; render();
+  }
+
+  /* ---------------- helpers ---------------- */
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const esc = s => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  function hl(text){
+    const safe = esc(text);
+    if(!query) return safe;
+    const q = esc(query).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return safe.replace(new RegExp(q, "gi"), m => `<mark>${m}</mark>`);
+  }
+  function relTime(ts){
+    const d = new Date(ts), now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if(sameDay) return d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+    const y = new Date(now); y.setDate(now.getDate()-1);
+    if(d.toDateString() === y.toDateString()) return "Gestern";
+    if(now - d < 6*864e5) return d.toLocaleDateString("de-DE",{weekday:"short"});
+    return d.toLocaleDateString("de-DE",{day:"numeric",month:"short", year: d.getFullYear()!==now.getFullYear() ? "2-digit" : undefined});
+  }
+  const colorVar = c => c && c !== "none" ? `var(--c-${c})` : "var(--line)";
+
+  /* ---------------- list ---------------- */
+  function renderLoading(){ $("list").innerHTML = `<div class="empty">Lade Notizen …</div>`; }
+  function render(){
+    if(!ready) return;
+    const all = [...notes.values()].filter(n => !(pendingDelete && pendingDelete.note.id === n.id));
+    $("count").textContent = all.length ? all.length : "";
+    const q = query.toLowerCase();
+    const list = all.filter(n => !q || (n.title||"").toLowerCase().includes(q) || (n.body||"").toLowerCase().includes(q))
+                    .sort((a,b) => b.updatedAt - a.updatedAt);
+    if(!all.length){
+      $("list").innerHTML = `<div class="empty"><strong>Noch keine Notizen</strong>Tippe auf „Neue Notiz“, um loszulegen.</div>`;
+      return;
+    }
+    if(!list.length){
+      $("list").innerHTML = `<div class="empty"><strong>Nichts gefunden</strong>Keine Notiz enthält „${esc(query)}“.</div>`;
+      return;
+    }
+    const pinned = list.filter(n => n.pinned), rest = list.filter(n => !n.pinned);
+    let html = "";
+    if(pinned.length){ html += `<div class="group-title">Angeheftet</div>` + ul(pinned); if(rest.length) html += `<div class="group-title">Weitere</div>`; }
+    else html += `<div style="height:14px"></div>`;
+    html += ul(rest);
+    $("list").innerHTML = html;
+  }
+  function ul(arr){
+    if(!arr.length) return "";
+    return `<ul class="notes">` + arr.map(n => {
+      const title = (n.title||"").trim();
+      const lines = (n.body||"").split("\n").map(l => l.trim()).filter(Boolean);
+      const shownTitle = title || lines[0] || "Leere Notiz";
+      const previewLines = (title ? lines : lines.slice(1)).slice(0, 3);
+      const preview = previewLines.map(l => l.slice(0, 120)).join("\n");
+      const pin = n.pinned ? `<svg class="pin" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-label="Angeheftet"><path d="M9 3h6l-1 6 4 4H6l4-4-1-6z"/><path d="M12 13v8" stroke="currentColor" stroke-width="2"/></svg>` : "";
+      return `<li><button class="card" data-id="${n.id}" style="--card-color:${colorVar(n.color)}">
+        ${pin}
+        <h2 class="${title||lines.length ? "" : "untitled"}">${hl(shownTitle)}</h2>
+        ${preview ? `<p>${hl(preview)}</p>` : ""}
+        <time>${relTime(n.updatedAt)}</time>
+      </button></li>`;
+    }).join("") + `</ul>`;
+  }
+  $("list").addEventListener("click", e => { const b = e.target.closest(".card"); if(b) openEditor(b.dataset.id); });
+  $("q").addEventListener("input", e => { query = e.target.value.trim(); render(); });
+
+  /* ---------------- editor ---------------- */
+  function autosize(el){ el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }
+  function openEditor(id, fresh){
+    currentId = id;
+    const n = notes.get(id);
+    $("title").value = n.title || ""; $("body").value = n.body || "";
+    updateEditorChrome();
+    setStatus(fresh ? "" : "");
+    $("editor").classList.add("open");
+    requestAnimationFrame(() => { autosize($("title")); autosize($("body")); });
+    if(fresh) setTimeout(() => $("title").focus(), 280);
+    history.pushState({note:id}, "");
+  }
+  function updateEditorChrome(){
+    const n = notes.get(currentId); if(!n) return;
+    $("pinBtn").classList.toggle("on", !!n.pinned);
+    $("pinBtn").setAttribute("aria-pressed", !!n.pinned);
+    $("pinBtn").setAttribute("aria-label", n.pinned ? "Lösen" : "Anheften");
+    $("editInner").style.borderLeftColor = n.color && n.color !== "none" ? colorVar(n.color) : "transparent";
+    $("meta").textContent = "Bearbeitet " + new Date(n.updatedAt).toLocaleString("de-DE",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+    $("colors").querySelectorAll(".swatch").forEach(s => s.setAttribute("aria-pressed", s.dataset.c === (n.color||"none")));
+  }
+  function closeEditor(fromPop){
+    if(!currentId) return;
+    const id = currentId, n = notes.get(id);
+    // flush pending write
+    if(timers.has(id)) persist(id, true);
+    // discard totally empty notes
+    if(n && !(n.title||"").trim() && !(n.body||"").trim()){ notes.delete(id); persist(id, true); }
+    currentId = null;
+    $("editor").classList.remove("open");
+    $("colors").classList.remove("show"); $("colorBtn").setAttribute("aria-expanded","false");
+    document.activeElement && document.activeElement.blur();
+    render();
+    if(!fromPop && history.state && history.state.note) history.back();
+  }
+  function edit(patch){
+    const n = notes.get(currentId); if(!n) return;
+    Object.assign(n, patch, {updatedAt: Date.now()});
+    updateEditorChrome();
+    persist(currentId);
+  }
+  $("title").addEventListener("input", e => { autosize(e.target); edit({title:e.target.value}); });
+  $("title").addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); $("body").focus(); } });
+  $("body").addEventListener("input", e => { autosize(e.target); edit({body:e.target.value}); });
+  $("backBtn").onclick = () => closeEditor();
+  window.addEventListener("popstate", () => { if(currentId) closeEditor(true); });
+  $("pinBtn").onclick = () => { const n = notes.get(currentId); edit({pinned:!n.pinned}); };
+  $("colorBtn").onclick = () => {
+    const show = !$("colors").classList.contains("show");
+    $("colors").classList.toggle("show", show); $("colorBtn").setAttribute("aria-expanded", show);
+  };
+  $("colors").innerHTML = COLORS.map(([c,label]) =>
+    `<button class="swatch ${c==="none"?"none":""}" data-c="${c}" aria-label="${label}" aria-pressed="false" style="${c!=="none"?`background:var(--c-${c})`:""}"></button>`).join("");
+  $("colors").addEventListener("click", e => { const s = e.target.closest(".swatch"); if(s) edit({color:s.dataset.c}); });
+
+  $("newBtn").onclick = () => {
+    const id = uid(), now = Date.now();
+    notes.set(id, {id, title:"", body:"", color:"none", pinned:false, createdAt:now, updatedAt:now});
+    openEditor(id, true);
+  };
+
+  /* ---------------- delete + undo ---------------- */
+  let pendingDelete = null, toastTimer;
+  function commitDelete(){
+    if(!pendingDelete) return;
+    const id = pendingDelete.note.id;
+    pendingDelete = null;
+    notes.delete(id); persist(id, true);
+  }
+  $("delBtn").onclick = () => {
+    const n = notes.get(currentId); if(!n) return;
+    commitDelete();
+    clearTimeout(timers.get(n.id)); timers.delete(n.id);
+    pendingDelete = {note:{...n}};
+    closeEditor();
+    showToast("Notiz gelöscht");
+  };
+  $("undoBtn").onclick = () => {
+    if(!pendingDelete) return;
+    notes.set(pendingDelete.note.id, pendingDelete.note);
+    pendingDelete = null; hideToast(); render();
+  };
+  function showToast(text){
+    $("toastText").textContent = text; $("toast").classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { hideToast(); commitDelete(); render(); }, 5000);
+  }
+  function hideToast(){ clearTimeout(toastTimer); $("toast").classList.remove("show"); }
+
+  /* ---------------- status ---------------- */
+  let statusTimer;
+  function setStatus(t){
+    $("status").textContent = t;
+    clearTimeout(statusTimer);
+    if(t === "Gespeichert") statusTimer = setTimeout(() => { $("status").textContent = ""; }, 1500);
+  }
+
+  // flush on hide
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "hidden"){ [...timers.keys()].forEach(id => persist(id, true)); commitDelete(); }
+  });
+
+  init();
+  if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
+  if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+})();
+</script>
+</body>
+</html>
